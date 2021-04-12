@@ -1,0 +1,37 @@
+---
+title: "Actividad Ayudantia 3"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Actividad en Clases
+
+```{r}
+setwd('/Users/amara/Documents/GitHub/Actividades-Ayudantias/Ayudantia 3')
+Titanic <- read.csv("titanic.csv")
+#Titanic
+```
+
+```{r}
+boxplot(Titanic$AGE, horizontal = TRUE )
+boxplot.stats(Titanic$AGE)
+```
+
+```{r}
+Titanic_1 <- Titanic$AGE[Titanic$AGE< 79]
+length(Titanic$AGE) - length(Titanic_1)
+boxplot.stats(Titanic_1)
+boxplot(Titanic_1, horizontal = TRUE)
+```
+
+```{r}
+Titanic_2 <- Titanic$AGE[Titanic$AGE< 76]
+length(Titanic$AGE) - length(Titanic_2)
+boxplot.stats(Titanic_2)
+boxplot(Titanic_2, horizontal = TRUE)
+```
+

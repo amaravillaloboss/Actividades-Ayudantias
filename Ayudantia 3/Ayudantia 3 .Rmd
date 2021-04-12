@@ -1,0 +1,64 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Caso 1
+```{r}
+library(datasets)
+data("rivers")
+hist(rivers)
+```
+
+```{r}
+boxplot(rivers, horizontal = TRUE)
+```
+
+```{r}
+boxplot.stats(rivers)
+```
+
+```{r}
+rivers_sinout <- rivers[rivers < 1240]
+
+boxplot(rivers_sinout, horizontal = TRUE)
+```
+
+```{r}
+boxplot.stats(rivers_sinout)
+```
+
+```{r}
+rivers_sinout1 <- rivers[rivers < 1100]
+
+boxplot(rivers_sinout1, horizontal = TRUE)
+```
+
+```{r}
+boxplot.stats(rivers_sinout1)
+```
+
+```{r}
+rivers_sinout2 <- rivers[rivers < 1054]
+
+boxplot(rivers_sinout2, horizontal = TRUE)
+```
+
+```{r}
+boxplot.stats(rivers_sinout2)
+```
+
+```{r}
+rivers_out <- rivers[!rivers %in% boxplot.stats(rivers)$out] 
+length(rivers) - length(rivers_out)
+```
+
+## Caso 2
+
+```{r}
+library(dplyr)
+```
