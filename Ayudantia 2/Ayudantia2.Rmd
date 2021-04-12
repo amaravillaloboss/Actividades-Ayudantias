@@ -1,0 +1,66 @@
+---
+title: "Actividad Ayudantia 2"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Análisis Exploratorio de Datos
+
+```{r}
+library(quanteda)
+library(dplyr)
+library(tidyverse)
+library(utf8)
+library(ggplot2)
+
+setwd('/Users/amara/Documents/GitHub/Actividades-Ayudantias/Ayudantia 2')
+Titanic <- read.csv("titanic.csv")
+```
+```{r}
+attach(Titanic)
+summary(Titanic)
+```
+
+```{r}
+#Borraremos los datos que son tipo char, generando una base de datos de variables numericas.
+Titanic <- Titanic[,!(colnames(Titanic) %in% c("WORKCLASS", "EDUCATION", "MARITAL.STATUS", "OCCUPATION", "RELATIONSHIP", "RACE", "SEX", "NATIVE.COUNTRY", "INCOME"))]
+```
+
+```{r}
+#Analisis Descriptivo
+Titanic_1 <- Titanic[order(Titanic$AGE, decreasing = TRUE),]
+```
+
+```{r}
+#Filtramos con capital.gain mayor a 0
+Titanic_CG <- filter(Titanic_1, CAPITAL.GAIN >0)
+summary(Titanic_CG)
+```
+```{r}
+#Histogramas de algunas variables
+hist(CAPITAL.GAIN)
+hist(CAPITAL.LOSS)
+hist(AGE)
+```
+```{r}
+#Filtramos con edad menor a 85 y numero educacion mayor a 11 que es la media.
+Titanic_AGE_EDUC <- filter(Titanic_1, AGE<85, EDUCATION.NUM>11 )
+summary(Titanic_AGE_EDUC)
+boxplot(Titanic_AGE_EDUC$EDUCATION.NUM, horizontal = TRUE)
+boxplot(Titanic_AGE_EDUC$AGE, horizontal = TRUE)
+```
+
+```{r}
+#Maximos y Minimos
+max(AGE)
+min(EDUCATION.NUM)
+```
+
+```{r}
+dotchart(Titanic$EDUCATION.NUM, labels = utf8_encode(Titanic$WORKCLASS), cex = 0.5, xlab = "Numero Educacion", ylab = "Edad")
+
+```
+

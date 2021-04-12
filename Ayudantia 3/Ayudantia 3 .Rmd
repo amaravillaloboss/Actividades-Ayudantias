@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Ayudantia 3"
 output: github_document
 ---
 
@@ -62,3 +62,72 @@ length(rivers) - length(rivers_out)
 ```{r}
 library(dplyr)
 ```
+
+```{r}
+setwd('/Users/amara/Documents/GitHub/Actividades-Ayudantias/Ayudantia 3')
+pokemon <- read.csv("pokemon.csv")
+pokemon
+```
+
+```{r}
+#pokemon_1 = filter(pokemon, pokemon$Generation %in% c(1, 2, 3))
+#pokemon_1
+
+#attach(pokemon)
+
+```
+
+```{r}
+#Muestro variable Attack, boxplot para visualizar outliers, y en $out me indica que valor tienen los outliers.
+boxplot(Attack, horizontal = TRUE)
+boxplot.stats(Attack)
+```
+
+```{r}
+#Realizo filtro e base de datos, dejando solo valores que son menores a 170 ya que era el mínimo valor de los #outliers.
+pokemon_1 <- Attack[Attack< 170]
+length(Attack) - length(pokemon_1)
+```
+
+```{r}
+boxplot(pokemon_1, horizontal = TRUE)
+```
+```{r}
+boxplot.stats(pokemon_1)
+```
+
+
+
+```{r}
+# Para saber cuales outliers fueron lo que borre, filtro que solo muestre los valores mayores a 165
+
+outliers_attack <- filter(pokemon, pokemon$Attack > 165)
+outliers_attack
+
+```
+
+```{r}
+#Analizamos ahora la variable defensa
+boxplot(Defense, horizontal = TRUE)
+```
+```{r}
+boxplot.stats(Defense)
+```
+
+```{r}
+pokemon_2 <- Defense[Defense< 160]
+length(Defense) - length(pokemon_2)
+
+```
+
+```{r}
+boxplot(pokemon_2, horizontal = TRUE)
+```
+```{r}
+boxplot.stats(pokemon_2)
+```
+```{r}
+outliers_defense <- filter(pokemon, pokemon$Defense > 159)
+outliers_defense
+```
+
