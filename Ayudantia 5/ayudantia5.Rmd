@@ -55,7 +55,7 @@ dataescalada %>% summary()
 
 ```
 
-#Analisis K-means
+##Analisis K-means
 ```{r}
 modelokmeans <- kmeans(dataescalada, centers = 4)
 modelokmeans2 <- kmeans(datanumerica, centers = 4)
@@ -91,7 +91,7 @@ for(k in 1:30){
 plot(SSinterior)
 ```
 
-#Metodo del codo
+##Metodo del codo
 ```{r}
 
 k.max <- 30
