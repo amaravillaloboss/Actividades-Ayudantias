@@ -1,0 +1,145 @@
+---
+title: "Ayudantia 5"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+setwd('/Users/amara/Documents/GitHub/Actividades-Ayudantias/Ayudantia 5')
+Sanguchez <- read.csv("sanguchez.csv", sep=';')
+```
+
+```{r}
+head(Sanguchez)
+```
+
+```{r}
+summary(Sanguchez)
+
+```
+#Eliminamos datos faltantes y verificamos variables numericas
+```{r}
+Sanguchez = na.omit(Sanguchez)
+Sanguchez <- filter(Sanguchez, str_detect(Sanguchez$Precio,"\\$")==T)
+
+Sanguchez$Precio = str_replace_all(Sanguchez$Precio, "^ ", "")
+Sanguchez$Precio = str_replace_all(Sanguchez$Precio, " $", "")
+
+attach(Sanguchez)
+
+Sanguchez <- filter(Sanguchez, str_count(Precio, "\\$")==1 &  str_count(Precio," ")==0)
+
+attach(Sanguchez)
+
+Sanguchez$Precio = str_replace_all(Sanguchez$Precio, "\\$", "")
+Sanguchez$Precio = str_replace_all(Sanguchez$Precio, "\\.", "")
+
+Sanguchez$Precio = as.integer(Sanguchez$Precio) 
+```
+
+```{r}
+Sanguchez$nota <-as.numeric(Sanguchez$nota)
+
+datanumerica <- Sanguchez[,colnames(Sanguchez) %in% c("Precio","nota")]
+
+dataescalada = scale(datanumerica) %>% as_tibble()
+
+dataescalada %>% summary()
+
+```
+
+#Analisis K-means
+```{r}
+modelokmeans <- kmeans(dataescalada, centers = 4)
+modelokmeans2 <- kmeans(datanumerica, centers = 4)
+
+dataescalada$clus <- modelokmeans$cluster %>% as.factor()
+datanumerica$clus <- modelokmeans2$cluster %>% as.factor()
+
+ggplot(dataescalada, aes(Precio, nota, color=clus)) +
+  geom_point(alpha=0.5, show.legend = T) +
+  theme_bw()
+
+```
+
+```{r}
+infoclus <- modelokmeans$centers
+infoclus2 <- modelokmeans2$centers
+
+infoclus
+```
+
+```{r}
+infoclus2
+```
+
+```{r}
+SSinterior <- numeric(30)
+
+for(k in 1:30){
+  modelo <- kmeans(dataescalada, centers = k)
+  SSinterior[k] <- modelo$tot.withinss
+}
+
+plot(SSinterior)
+```
+
+#Metodo del codo
+```{r}
+
+k.max <- 30
+wss1 <- sapply(1:k.max, 
+              function(k){kmeans(dataescalada, k, nstart=50,iter.max = 8)$tot.withinss})
+wss2 <- sapply(1:k.max, 
+              function(k){kmeans(datanumerica, k, nstart=50,iter.max = 8)$tot.withinss})
+
+```
+
+```{r}
+#wss1
+plot(1:k.max, wss1,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Numeros de clusters K",
+     ylab="Total within-clusters sum of squares")
+```
+
+```{r}
+
+plot(1:k.max, wss2,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Numeros de clusters K",
+     ylab="Total within-clusters sum of squares")
+
+```
+##Evaluación de Clusteres: Inspección Visual
+```{r}
+dataescalada$clus <- as.numeric(dataescalada$clus)
+datanumerica$clus <- as.numeric(datanumerica$clus)
+
+# uso distancia euclidiana
+tempDist <- dist(dataescalada) %>% as.matrix()
+
+#reordeno filas y columnas en base al cluster obtenido
+index <- sort(modelokmeans$cluster, index.return=TRUE)
+tempDist <- tempDist[index$ix,index$ix]
+rownames(tempDist) <- c(1:nrow(dataescalada))
+colnames(tempDist) <- c(1:nrow(dataescalada))
+
+image(tempDist)
+
+```
+
+
+
+
+
+
+
+
