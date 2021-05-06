@@ -1,0 +1,153 @@
+---
+title: "Ayudantia 6"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(cluster)
+library(factoextra)
+library(janitor)
+```
+
+```{r}
+##install.packages("kassambara/factoextra", force = TRUE)
+```
+
+
+##Visualización de los datos
+```{r}
+setwd('/Users/amara/Documents/GitHub/Actividades-Ayudantias/Ayudantia 6')
+Spotify <- read.csv("Spotify_Songs.csv")
+summary(Spotify)
+```
+#Pre Procesamiento de los datos
+
+##Limpieza Datos:
+- Primero eliminamos NA
+```{r}
+Spotify[Spotify == ""] <- NA 
+
+Spotify %>% 
+  summarise_all(funs(sum(is.na(.))))
+
+Spotify_pre <- Spotify %>% 
+  filter(!(is.na(track_name)|is.na(track_artist)|is.na(track_album_name)|is.na(duration_ms)))
+
+Spotify_pre %>% 
+  summarise_all(funs(sum(is.na(.))))
+
+```
+-Segundo filtramos y removeos datos duplicados
+```{r}
+Spotify_pre <- Spotify_pre[!duplicated(Spotify_pre$track_id),]
+```
+
+-Tercero verificamos si existen erros en los datos
+```{r}
+
+Spotify_pre$track_popularity <- as.numeric(as.character(Spotify_pre$track_popularity))
+
+Spotify_pre <- Spotify_pre %>% 
+  filter(!(is.na(track_popularity)))
+
+Spotify_pre <- Spotify_pre[!grepl("<U",Spotify_pre$track_name),]
+Spotify_pre <- Spotify_pre[!grepl("<U",Spotify_pre$track_artist),]
+
+Spotify_pre %>% count(duplicated(Spotify_pre$track_name))
+
+Spotify_pre %>% distinct(track_name, .keep_all = TRUE, )
+
+Spotify_pre$duplicate <- duplicated(Spotify_pre[,c("track_name", "track_artist")])
+
+Spotify_dupli <- Spotify_pre %>% 
+  filter(Spotify_pre$duplicate == TRUE) %>% 
+  arrange("track_name", "track_popularity", desc(track_popularity))
+
+Spotify_dupli <- Spotify_dupli %>% 
+  distinct(track_name, track_artist, .keep_all = TRUE)
+
+Spotify_pre <- Spotify_pre[!(Spotify_pre$duplicate == TRUE),]
+
+Spotify_pre <- rbind(Spotify_pre, Spotify_dupli)
+
+Spotify_pre$duplicate <- NULL
+```
+## Revisar Estructura Datos
+```{r}
+
+Spotify_pre$track_id <- as.character(Spotify_pre$track_id)
+Spotify_pre$track_name <- as.character(Spotify_pre$track_name)
+Spotify_pre$track_artist <- as.character(Spotify_pre$track_artist)
+Spotify_pre$track_album_id <- as.character(Spotify_pre$track_album_id)
+Spotify_pre$track_album_name <-  as.character(Spotify_pre$track_album_name)
+Spotify_pre$playlist_name <- as.character(Spotify_pre$playlist_name)
+Spotify_pre$playlist_id <- as.character(Spotify_pre$playlist_id)
+Spotify_pre$playlist_genre <- as.character(Spotify_pre$playlist_genre)
+Spotify_pre$playlist_subgenre <- as.character(Spotify_pre$playlist_subgenre)
+Spotify_pre$danceability <- as.double(as.character(Spotify_pre$danceability))
+Spotify_pre$energy <- as.double(as.character(Spotify_pre$energy))
+Spotify_pre$key <- as.double(as.character(Spotify_pre$key))
+Spotify_pre$loudness <- as.double(as.character(Spotify_pre$loudness))
+Spotify_pre$mode <- as.double(as.character(Spotify_pre$mode))
+Spotify_pre$speechiness <- as.double(as.character(Spotify_pre$speechiness)) 
+Spotify_pre$acousticness <- as.double(as.character(Spotify_pre$acousticness))
+Spotify_pre$instrumentalness <- as.double(as.character(Spotify_pre$instrumentalness))
+Spotify_pre$liveness <- as.double(as.character(Spotify_pre$liveness))
+Spotify_pre$valence <- as.double(as.character(Spotify_pre$valence))
+Spotify_pre$tempo <- as.double(as.character(Spotify_pre$tempo))
+Spotify_pre$duration_ms <- as.double(as.character(Spotify_pre$duration_ms))
+
+
+
+Spotify_char <- c("track_id", "track_name", "track_artist", "track_album_id", "track_album_name", "playlist_name", "playlist_id", "playlist_genre", "playlist_subgenre")
+Spotify_dou <- c("track_popularity","danceability", "energy", "key", "loudness", "mode", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo", "duration_ms")
+
+Spotify_pre <- Spotify_pre %>% 
+  filter(!(is.na(key)|is.na(danceability)))
+summary(Spotify_pre)
+str(Spotify_pre)
+
+```
+
+##Separo Datos
+```{r}
+Spotifynum <- Spotify_pre %>% 
+  select(Spotify_dou)
+Spotifychar <- Spotify_pre %>% 
+  select(Spotify_char)
+```
+
+#Escalar Datos
+```{r}
+Spotify_sca <- sapply(Spotifynum, scale)
+```
+
+
+#Procesamiento de los Datos
+
+##Clustering Jerarquico
+
+-Matriz de Distancias
+```{r}
+#Distancia Euclideana
+d = dist(Spotify_sca, method = "euclidean")
+#Distancia Manhattan
+d1 = dist(Spotify_sca, method = "manhattan")
+#Distancia Minkowski
+d2 = dist(Spotify_sca, method = "minkowski")
+hist(d, main = "Histograma Distancia Euclideana")
+hist(d1, main = "Histograma Distancia Manhattan")
+hist(d2, main = "Histograma Distancia Minkowski")
+```
+
+```{r}
+
+Spotify_sample <- Spotify$key%>% sample(n=10000)
+```
+
+
