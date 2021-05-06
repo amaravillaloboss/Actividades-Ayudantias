@@ -147,7 +147,7 @@ hist(d2, main = "Histograma Distancia Minkowski")
 
 ```{r}
 
-Spotify_sample <- Spotify$key%>% sample(n=10000)
+##Spotify_sample <- Spotify$key%>% sample(n=10000)
 ```
 
 
