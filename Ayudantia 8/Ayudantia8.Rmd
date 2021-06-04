@@ -1,0 +1,241 @@
+---
+title: "Ayudantia 8"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Importar Librerías
+```{r}
+library(tidyverse)
+library(cluster)
+library(factoextra)
+library(mclust)
+```
+
+#Cargar Datos
+```{r}
+setwd('/Users/amara/Documents/GitHub/Actividades-Ayudantias/Ayudantia 8')
+spotify <- read.csv("Spotify.csv")
+```
+
+
+PRIMER ANALISIS
+
+#Datos NA
+```{r}
+spotify %>% 
+  summarise_all(funs(sum(is.na(.))))
+
+#Eliminamos 3 variables categoricas que parecen ser irrelevantes para nuestro analisis
+spotify$artist_name <- NULL
+spotify$album_name <- NULL
+spotify$track_name <- NULL
+str(spotify)
+
+set.seed(500)
+
+spotify_muestra <- spotify[sample(nrow(spotify), 7000),]
+class <- spotify_muestra$duration_ms
+muestra <- spotify_muestra[,1:10]
+
+```
+
+
+#Escalar datos
+```{r}
+set.seed(500)
+muestra_sca <- sapply(muestra, scale) %>% as_tibble()
+
+clPairs(muestra_sca, class)
+
+```
+
+
+
+
+###DBSCAN
+Podemos ver que tenemos 3 clusters generados por dbscan.
+```{r}
+
+library(dbscan)
+
+set.seed(500)
+
+model = dbscan(muestra_sca, eps = 2, minPts = 7)
+
+model
+
+```
+
+##Plot
+```{r}
+ggplot(muestra_sca, aes(energy, liveness, color = factor(model$cluster), size = energy)) + 
+  geom_point(alpha = 0.3) 
+```
+
+###FUZZY C-MEANS
+```{r}
+library(e1071)
+
+set.seed(500)
+
+modelo_cmeans <- cmeans(muestra_sca,  7, m=2) 
+
+modelo_cmeans$membership %>% head()
+```
+
+##Plot
+```{r}
+ggplot(muestra_sca, aes(energy, liveness, color = factor(modelo_cmeans$cluster), size = energy)) + 
+  geom_point(alpha = 0.3) 
+```
+
+##FCP
+```{r}
+matriz <- modelo_cmeans$membership%*%t(modelo_cmeans$membership)
+
+(FPC <- sum(matriz*diag(nrow(matriz)))/nrow(matriz))
+```
+
+###GMM
+```{r}
+set.seed(500)
+
+model_gmm = Mclust(muestra_sca)
+
+model_gmm 
+
+summary(model_gmm, parameters = TRUE)
+```
+
+
+##Plot
+```{r}
+
+ggplot(muestra_sca) + 
+  aes(x=energy, y=liveness, color=factor(model_gmm$classification)) + 
+  geom_point(alpha=1)
+
+fviz_cluster(model_gmm, muestra_sca, stand = FALSE, frame = FALSE,geom = "point")
+```
+
+##BIC
+```{r}
+plot(model_gmm, what = "BIC")
+```
+
+
+SEGUNDO ANÁLISIS
+
+Realizamos un segundo analisis eliminando las variables que podrian estar correlacionada y que seria rebundante tener ambas.
+```{r}
+spotify_muestra1 <- spotify_muestra[colnames(spotify_muestra) %in% c("energy", "key", "loudness","speechness", "acousticness")]
+
+class1 <- spotify_muestra1$energy
+
+muestra1_sca <- sapply(spotify_muestra1, scale) %>% as_tibble()
+
+clPairs(muestra1_sca,class1)
+```
+
+
+###DBSCAN
+```{r}
+set.seed(500)
+
+model1 = dbscan(muestra1_sca, eps= 1, minPts = 3 )
+model1
+
+
+set.seed(500)
+
+c_means1 <- cmeans(muestra1_sca,  2,m=2) 
+
+c_means1$membership %>% head()
+
+
+matrix1 <- c_means1$membership%*%t(c_means1$membership) 
+
+(FPC <- sum(matrix1*diag(nrow(matrix1)))/nrow(matrix1))
+```
+
+
+
+###GMM
+```{r}
+set.seed(500)
+
+model_gmm1 = Mclust(muestra1_sca)
+
+model_gmm1
+
+summary(model_gmm1, parameters = TRUE)
+```
+
+
+##Plot
+
+```{r}
+ggplot(muestra1_sca) + 
+  aes(x=energy, y=loudness, color=factor(model_gmm1$classification)) + 
+  geom_point(alpha=1)
+
+fviz_cluster(model_gmm1, muestra1_sca, stand = FALSE, frame = FALSE,geom = "point")
+
+plot(model_gmm1, what = "BIC")
+```
+
+
+TERCER ANÁLISIS
+```{r}
+spotify_muestra2 <- spotify_muestra[colnames(spotify_muestra) %in% c("speechiness", "loudness", "instrumentalnes", "liveness")]
+
+class2 <- spotify_muestra2$loudness
+
+muestra2_sca <- sapply(spotify_muestra2, scale) %>% as_tibble()
+
+clPairs(muestra2_sca,class1)
+```
+
+
+###DBSCAN
+
+```{r}
+set.seed(500)
+
+model2 <- dbscan(muestra2_sca, eps = 1, minPts = 3)
+
+model2
+```
+
+###FUZZY C-MEANS
+
+```{r}
+set.seed(500)
+
+c_means2 <- cmeans(muestra2_sca, 4, m = 1.5 )
+
+c_means2$membership %>% head()
+
+matrix <- c_means2$membership %*% t(c_means2$membership)
+(FPC <- sum(matrix*diag(nrow(matrix)))/nrow(matrix))
+```
+
+###GMM
+```{r}
+set.seed(500)
+
+model_gmm2 = Mclust(muestra2_sca)
+
+model_gmm2
+
+summary(model_gmm2, parameters = TRUE)
+
+plot(model_gmm2, what = "BIC")
+```
+
+
+
