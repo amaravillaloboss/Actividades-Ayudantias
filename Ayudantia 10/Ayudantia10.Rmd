@@ -1,0 +1,53 @@
+---
+title: "Ayudantia 10"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Librerias
+```{r}
+library(tidyverse)
+library(e1071)
+#install.packages('caret')
+library(caret)
+#install.packages('rstanarm')
+library(rstanarm)
+#library(titanic)
+```
+
+## Cargar Datos
+```{r}
+setwd('/Users/amara/Documents/GitHub/Actividades-Ayudantias/Ayudantia 10')
+credit <- read.csv("UCI_Credit_Card.csv")
+
+glimpse(credit)
+```
+
+
+```{r}
+credit$EDUCATION <- str_extract(credit$EDUCATION, "[0-9]")
+credit$SEX <- (credit$SEX == "female") %>% as.numeric()
+
+credit <- credit[c(4,3,5:10,2)]
+
+str(credit)
+```
+```{r}
+credit$EDUCATION <- NULL
+credit$SEX <- NULL
+credit$MARRIAGE <- NULL
+credit$AGE <- NULL
+
+
+str(credit)
+```
+
+```{r}
+library(e1071)
+
+#credit_linear <- stan_glm(Survived ~ LIMIT_BAL + as.factor(default.payment.next.month),data = credit, family = gaussian)
+```
+
